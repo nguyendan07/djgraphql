@@ -28,8 +28,30 @@ class CreateAuthor(graphene.ClientIDMutation):
         return CreateAuthor(author=author)
 
 
+class UpdateAuthor(graphene.ClientIDMutation):
+    author = graphene.Field(AuthorType)
+    class Input:
+        id = graphene.Int()
+        first_name = graphene.String()
+        last_name = graphene.String()
+        email = graphene.String()
+    
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        author = Author.objects.get(pk=input.get('id'))
+        if input.get('first_name'):
+            author.first_name = input.get('first_name')
+        if input.get('last_name'):
+            author.last_name = input.get('last_name')
+        if input.get('email'):
+            author.email = input.get('email')
+        author.save()
+        return UpdateAuthor(author=author)
+
+
 class AuthorMutation(graphene.ObjectType):
     create_author = CreateAuthor.Field()
+    update_author = UpdateAuthor.Field()
 
 
 class Query(graphene.ObjectType):
